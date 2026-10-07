@@ -85,6 +85,10 @@ class WorkersMetricsAuditIntegrationTest extends IntegrationTestBase {
 
     @Test
     void auditTrailContainsAuthAndJobCreationEntries() {
+        // The shared token cache skips logins, and every test wipes audit_logs —
+        // so this test must generate its own auth.login entry instead of relying
+        // on rows left over from earlier classes (test-order independence).
+        login("operator", OPERATOR_PASSWORD);
         createJob("user");
 
         ResponseEntity<String> logins = get("operator", "/api/v1/logs?action=auth.login");

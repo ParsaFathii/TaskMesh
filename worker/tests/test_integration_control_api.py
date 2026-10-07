@@ -8,6 +8,7 @@ backend; ``anyio_backend`` is the plugin's default.
 
 from __future__ import annotations
 
+import os
 import time
 
 import pytest
@@ -62,7 +63,11 @@ class TestControlApi:
             assert body["worker"]["capabilities"] == sorted(ALL_JOB_TYPES)
             assert body["worker"]["control_port"] == 9199
             assert body["config"]["controlPort"] == 9199
-            assert body["config"]["databaseUrl"].startswith("postgresql://localhost:5433/")
+            # port follows the test PG service port (5432 in CI, 5433 locally)
+            expected_port = os.environ.get("TASKMESH_TEST_PG_PORT", "5433")
+            assert body["config"]["databaseUrl"] == (
+                f"postgresql://localhost:{expected_port}/taskmesh_worker_test"
+            )
 
             runtime._heartbeat_once()
             body = (await client.get("/status")).json()

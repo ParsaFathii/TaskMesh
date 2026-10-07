@@ -51,7 +51,10 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-          # java analysis needs build info; we let CodeQL autobuild
+      - name: Build Java sources for CodeQL extraction
+        if: matrix.language == 'java-kotlin'
+        working-directory: backend
+        run: mvn -B -ntp -DskipTests package
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:

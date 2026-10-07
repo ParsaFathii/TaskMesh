@@ -124,9 +124,9 @@ jobs:
       - name: Python SBOM
         working-directory: worker
         run: |
-          pip install cyclonedx-bom
-          pip freeze > requirements-frozen.txt
-          cyclonedx-py requirements --of JSON --validate -o ../sbom-worker.json -i requirements-frozen.txt
+          pip install -e . cyclonedx-bom
+          pip freeze --exclude-editable > requirements-frozen.txt
+          cyclonedx-py requirements -o ../sbom-worker.json --of JSON requirements-frozen.txt
       - name: Web SBOM
         working-directory: web
         run: |

@@ -1,0 +1,4 @@
+# gitleaks findings reviewed and accepted:
+# android test fixtures contain obviously fake JWT/token strings for DTO parsing tests.
+# No real credentials are involved.
+2f4a73cad24539dfc269b19d254cf9d77cdbd550:android/app/src/test/java/com/taskmesh/app/data/DtoParsingTest.kt:generic-api-key:31
