@@ -2,7 +2,7 @@
 # Build:  docker build -t taskmesh-web:0.1.0 ./web
 # Run:    docker run -p 8081:80 taskmesh-web:0.1.0 (expects TASKMESH_API upstream via nginx proxy)
 
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /src
 COPY package.json package-lock.json ./
 RUN npm ci
