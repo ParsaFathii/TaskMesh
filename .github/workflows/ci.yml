@@ -1,0 +1,154 @@
+# TaskMesh CI — validates every pull request and push to main.
+# Components: Java 21 backend, Python 3.12 worker, React/Vite web, Kotlin Android.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Java 21 + PostgreSQL integration)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: taskmesh
+          POSTGRES_DB: taskmesh_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U taskmesh"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      TASKMESH_TEST_DB_URL: jdbc:postgresql://localhost:5432/taskmesh_test
+      TASKMESH_TEST_DB_USER: taskmesh
+      TASKMESH_TEST_DB_PASSWORD: ""
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build, unit + integration tests
+        run: mvn -B -ntp clean verify
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-test-reports
+          path: backend/target/surefire-reports/
+          retention-days: 7
+
+  worker:
+    name: Worker (Python 3.12 + PostgreSQL integration)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: taskmesh
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U taskmesh"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      TASKMESH_TEST_PG_HOST: localhost
+      TASKMESH_TEST_PG_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Lint (ruff)
+        run: ruff check .
+      - name: Tests (unit + integration)
+        run: python -m pytest -q --timeout=120
+      - name: Build wheel + sdist
+        run: |
+          pip install build
+          python -m build
+      - name: Install wheel into clean venv and import
+        run: |
+          python -m venv /tmp/wheelcheck
+          /tmp/wheelcheck/bin/pip install dist/*.whl
+          /tmp/wheelcheck/bin/python -c "import taskmesh_worker; from taskmesh_worker.registry import HANDLERS; assert len(HANDLERS) >= 7"
+
+  web:
+    name: Web (React + Vite, node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "22"]
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck (strict)
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Production build
+        run: npm run build
+
+  android:
+    name: Android (Kotlin + Compose)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+      - name: Build debug APK
+        run: ./gradlew --no-daemon assembleDebug
+      - name: Upload APK artifact (debug, for inspection only)
+        uses: actions/upload-artifact@v7
+        with:
+          name: taskmesh-android-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 7

@@ -1,0 +1,20 @@
+# Dependency review: blocks PRs that introduce vulnerable or unlicensed dependencies.
+name: dependency-review
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Dependency review
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+          # npm lockfile at web/ is picked up automatically; gradle/pip are
+          # validated by their own CI jobs (no lockfile-based SBOM here yet).

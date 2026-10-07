@@ -1,0 +1,221 @@
+# TaskMesh release pipeline.
+# Triggered by pushing a version tag (v0.1.0). Runs the full validation suite,
+# builds every release artifact, generates checksums + SBOM, and publishes a
+# GitHub Release. Docker images are published by docker.yml on the same tag.
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write # create the release and upload assets
+
+jobs:
+  validate:
+    name: Validate (clean build + tests)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: taskmesh
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U taskmesh"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      TASKMESH_TEST_DB_URL: jdbc:postgresql://localhost:5432/taskmesh_test
+      TASKMESH_TEST_DB_USER: taskmesh
+      TASKMESH_TEST_DB_PASSWORD: ""
+      TASKMESH_TEST_PG_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Tag/version consistency check
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          test -f backend/pom.xml && grep -q "<version>${TAG}</version>" backend/pom.xml \
+            || { echo "backend/pom.xml version != tag $TAG"; exit 1; }
+          grep -q "version = \"${TAG}\"" worker/pyproject.toml \
+            || { echo "worker/pyproject.toml version != tag $TAG"; exit 1; }
+          grep -q "\"version\": \"${TAG}\"" web/package.json \
+            || { echo "web/package.json version != tag $TAG"; exit 1; }
+      - name: Backend — clean verify (unit + integration)
+        working-directory: backend
+        run: mvn -B -ntp clean verify
+      - name: Worker — lint + tests + package
+        working-directory: worker
+        run: |
+          pip install -e ".[dev]" build
+          ruff check .
+          python -m pytest -q --timeout=120
+          python -m build
+      - name: Web — lint, typecheck, tests, build
+        working-directory: web
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run test
+          npm run build
+      - name: Web production bundle artifact
+        working-directory: web
+        run: |
+          cd dist && zip -r ../taskmesh-web-${GITHUB_REF_NAME#v}.zip . && cd ..
+      - name: Android — unit tests + unsigned release APK
+        working-directory: android
+        run: |
+          ./gradlew --no-daemon testDebugUnitTest
+          ./gradlew --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release-unsigned.apk \
+             taskmesh-android-${GITHUB_REF_NAME#v}-unsigned.apk
+      - name: Normalize backend jar name
+        run: cp backend/target/taskmesh-backend.jar taskmesh-backend-${GITHUB_REF_NAME#v}.jar
+      - name: Upload all build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-artifacts
+          path: |
+            taskmesh-backend-*.jar
+            worker/dist/*.whl
+            worker/dist/*.tar.gz
+            web/taskmesh-web-*.zip
+            android/taskmesh-android-*-unsigned.apk
+          retention-days: 7
+
+  sbom:
+    name: SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Java SBOM
+        working-directory: backend
+        run: |
+          mvn -B -ntp org.cyclonedx:cyclonedx-maven-plugin:makeAggregateBom -DskipTests
+          mv target/bom.json ../sbom-backend.json
+      - name: Python SBOM
+        working-directory: worker
+        run: |
+          pip install cyclonedx-bom
+          pip freeze > requirements-frozen.txt
+          cyclonedx-py requirements --of JSON --validate -o ../sbom-worker.json -i requirements-frozen.txt
+      - name: Web SBOM
+        working-directory: web
+        run: |
+          npm install -g @cyclonedx/cyclonedx-npm
+          cyclonedx-npm --output-format JSON --output-file ../sbom-web.json
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-sbom
+          path: sbom-*.json
+          retention-days: 7
+
+  release:
+    name: Checksums + GitHub Release
+    needs: [validate, sbom]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find dist/release-artifacts dist/release-sbom -type f -exec cp {} release/ \;
+          cd release
+          for f in taskmesh-backend-*.jar taskmesh-worker-*.whl taskmesh-worker-*.tar.gz taskmesh-web-*.zip taskmesh-android-*.apk; do
+            test -f "$f" || { echo "missing artifact: $f"; ls; exit 1; }
+          done
+      - name: SHA-256 checksums + verification
+        working-directory: release
+        run: |
+          sha256sum taskmesh-backend-*.jar taskmesh-worker-*.whl taskmesh-worker-*.tar.gz \
+                    taskmesh-web-*.zip taskmesh-android-*.apk sbom-*.json > SHA256SUMS
+          cat SHA256SUMS
+          sha256sum -c SHA256SUMS
+      - name: Build release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          VER="${TAG#v}"
+          {
+            echo "# TaskMesh ${TAG}"
+            echo
+            echo "Distributed job processing and worker orchestration platform."
+            echo
+            echo "## Changes"
+            echo "- Initial release: Java 21 Spring Boot API, PostgreSQL queue (SKIP LOCKED + LISTEN/NOTIFY), Python 3.12 worker runtime with 7 job handlers, React/Vite operations console, Kotlin Android client"
+            echo "- Auth (JWT + BCrypt, roles ADMIN/OPERATOR/USER), audit logging, retries with backoff, timeouts, cancellation, idempotent submission, live WebSocket monitoring"
+            echo
+            echo "## Artifacts"
+            echo "- \`taskmesh-backend-*.jar\` — Spring Boot fat JAR (Java 21)"
+            echo "- \`taskmesh_worker-*-py3-none-any.whl\` / \`.tar.gz\` — Python worker package"
+            echo "- \`taskmesh-web-*.zip\` — production web bundle (static, serve with the provided nginx config)"
+            echo "- \`taskmesh-android-*-unsigned.apk\` — Android client, **unsigned release build** (sign before distribution)"
+            echo "- \`sbom-*.json\` — CycloneDX SBOMs per component"
+            echo "- \`SHA256SUMS\` — checksums for all artifacts above"
+            echo
+            echo "## Install"
+            echo "- Docker: \`docker compose -f deploy/compose/docker-compose.yml up -d\` (images on ghcr.io; see README)"
+            echo "- Manual: see README → Local development"
+            echo
+            echo "## Known limitations"
+            echo "- Android APK is unsigned; release signing requires your own keystore"
+            echo "- Queue uses PostgreSQL SKIP LOCKED (no external broker required); RabbitMQ integration is a documented future path"
+            echo "- Web console is dark-theme only by design"
+          } > release-notes.md
+          cat release-notes.md
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" \
+            --title "TaskMesh ${{ github.ref_name }}" \
+            --notes-file release/release-notes.md \
+            release/taskmesh-backend-*.jar \
+            release/taskmesh_worker-*.whl \
+            release/taskmesh_worker-*.tar.gz \
+            release/taskmesh-web-*.zip \
+            release/taskmesh-android-*-unsigned.apk \
+            release/sbom-*.json \
+            release/SHA256SUMS
+      - name: Verify release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          sleep 3
+          gh release view "$TAG" --json assets --jq '.assets[].name'
+          gh release view "$TAG" --json assets --jq '.assets | length'

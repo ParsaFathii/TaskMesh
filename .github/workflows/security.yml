@@ -1,0 +1,70 @@
+# TaskMesh security validation: CodeQL scanning + secret detection.
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "27 3 * * 1" # weekly, Monday 03:27 UTC
+
+permissions:
+  contents: read
+  security-events: write # required to upload CodeQL results
+
+jobs:
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            setup: java
+          - language: python
+            setup: python
+          - language: javascript-typescript
+            setup: node
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Java
+        if: matrix.setup == 'java'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Setup Python
+        if: matrix.setup == 'python'
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Setup Node
+        if: matrix.setup == 'node'
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          # java analysis needs build info; we let CodeQL autobuild
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Detect secrets in full history
+        uses: gitleaks/gitleaks-action@bcfb9cce635345aac9996cedc19b2de8e01b894f # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
