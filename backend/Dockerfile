@@ -9,7 +9,7 @@ RUN mvn -q -B dependency:go-offline
 COPY src ./src
 RUN mvn -q -B clean package -DskipTests
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 LABEL org.opencontainers.image.title="TaskMesh Backend" \
       org.opencontainers.image.description="Distributed job processing and worker orchestration platform — REST API, queue sweeper, WebSocket events" \
       org.opencontainers.image.version="0.1.0" \
