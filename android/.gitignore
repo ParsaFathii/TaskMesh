@@ -1,0 +1,38 @@
+# Gradle
+.gradle/
+build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local configuration (SDK path, machine-specific settings)
+local.properties
+
+# Signing — never commit keystores or key material (release-security policy)
+*.jks
+*.keystore
+*.pem
+*.p12
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------------------
+# IMPORTANT — source re-inclusion guards
+#
+# The repository-root .gitignore ignores `data/` runtime directories (worker
+# storage etc.) and some workspace-level ignores exclude `test` paths. Those
+# broad patterns would also swallow THIS module's Kotlin source and unit test
+# directories, silently breaking CI (missing classes). The negations below
+# re-include them explicitly; deeper .gitignore rules override parent ones.
+# Do not remove them.
+# ---------------------------------------------------------------------------
+!app/src/main/java/com/taskmesh/app/data/
+!app/src/main/java/com/taskmesh/app/data/**
+!app/src/test/
+!app/src/test/**

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Release overlay: cleartext traffic is disabled — production deployments must
+     serve the TaskMesh API over HTTPS. See README.md. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="false" />
+</manifest>
