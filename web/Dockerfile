@@ -9,7 +9,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 LABEL org.opencontainers.image.title="TaskMesh Web Console" \
       org.opencontainers.image.description="TaskMesh operations console — queue lanes, live job monitoring" \
       org.opencontainers.image.version="0.1.0" \
