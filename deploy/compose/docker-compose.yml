@@ -1,0 +1,77 @@
+# TaskMesh — local full-stack deployment
+# Usage:
+#   docker compose -f deploy/compose/docker-compose.yml up -d --build
+# Then open http://localhost:8080 (web) and log in with a seeded dev account.
+# Scale workers:
+#   docker compose -f deploy/compose/docker-compose.yml up -d --scale worker=4
+
+name: taskmesh
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: taskmesh
+      POSTGRES_USER: taskmesh
+      POSTGRES_PASSWORD: ${TASKMESH_DB_PASSWORD:?set TASKMESH_DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskmesh -d taskmesh"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ../../backend
+    image: ghcr.io/parsafathii/taskmesh-backend:0.1.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      TASKMESH_DB_URL: jdbc:postgresql://postgres:5432/taskmesh
+      TASKMESH_DB_USER: taskmesh
+      TASKMESH_DB_PASSWORD: ${TASKMESH_DB_PASSWORD}
+      TASKMESH_JWT_SECRET: ${TASKMESH_JWT_SECRET:?set TASKMESH_JWT_SECRET in .env}
+      TASKMESH_STORAGE_DIR: /var/lib/taskmesh
+    volumes:
+      - taskmesh-data:/var/lib/taskmesh
+    ports:
+      - "8080:8080"   # direct API access (optional; web proxies too)
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  worker:
+    build:
+      context: ../../worker
+    image: ghcr.io/parsafathii/taskmesh-worker:0.1.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      TASKMESH_DATABASE_URL: postgresql://taskmesh:${TASKMESH_DB_PASSWORD}@postgres:5432/taskmesh
+      TASKMESH_STORAGE_DIR: /var/lib/taskmesh
+      TASKMESH_HEARTBEAT_INTERVAL_S: "10"
+      TASKMESH_CONTROL_PORT: "9100"
+    volumes:
+      - taskmesh-data:/var/lib/taskmesh
+    # control API is per-worker; not exposed by default (expose manually to inspect)
+
+  web:
+    build:
+      context: ../../web
+    image: ghcr.io/parsafathii/taskmesh-web:0.1.0
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+
+volumes:
+  pgdata:
+  taskmesh-data:
