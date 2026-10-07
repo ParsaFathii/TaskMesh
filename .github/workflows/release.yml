@@ -156,13 +156,13 @@ jobs:
           mkdir -p release
           find dist/release-artifacts dist/release-sbom -type f -exec cp {} release/ \;
           cd release
-          for f in taskmesh-backend-*.jar taskmesh-worker-*.whl taskmesh-worker-*.tar.gz taskmesh-web-*.zip taskmesh-android-*.apk; do
+          for f in taskmesh-backend-*.jar taskmesh_worker-*.whl taskmesh_worker-*.tar.gz taskmesh-web-*.zip taskmesh-android-*.apk; do
             test -f "$f" || { echo "missing artifact: $f"; ls; exit 1; }
           done
       - name: SHA-256 checksums + verification
         working-directory: release
         run: |
-          sha256sum taskmesh-backend-*.jar taskmesh-worker-*.whl taskmesh-worker-*.tar.gz \
+          sha256sum taskmesh-backend-*.jar taskmesh_worker-*.whl taskmesh_worker-*.tar.gz \
                     taskmesh-web-*.zip taskmesh-android-*.apk sbom-*.json > SHA256SUMS
           cat SHA256SUMS
           sha256sum -c SHA256SUMS
