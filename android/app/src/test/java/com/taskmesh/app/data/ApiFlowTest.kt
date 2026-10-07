@@ -124,7 +124,7 @@ class ApiFlowTest {
         val recorded = server.takeRequest()
         assertEquals("GET", recorded.method)
         assertEquals("Bearer jwt-abc", recorded.headers["Authorization"])
-        assertEquals(1, result.getOrNull()?.total)
+        assertEquals(1L, result.getOrNull()?.total)
     }
 
     @Test

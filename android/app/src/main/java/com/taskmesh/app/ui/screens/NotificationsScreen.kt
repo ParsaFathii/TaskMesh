@@ -39,6 +39,7 @@ import com.taskmesh.app.model.TimeFormat
 import com.taskmesh.app.notifications.AppEvent
 import com.taskmesh.app.notifications.EventKind
 import com.taskmesh.app.notifications.NotificationCenter
+import com.taskmesh.app.notifications.label
 import com.taskmesh.app.ui.components.EmptyState
 import com.taskmesh.app.ui.theme.TaskMeshEmerald
 import com.taskmesh.app.ui.theme.TaskMeshRose

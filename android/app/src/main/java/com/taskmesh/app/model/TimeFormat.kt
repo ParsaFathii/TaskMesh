@@ -41,11 +41,12 @@ object TimeFormat {
 
     fun relativeTo(timestampMs: Long, nowMs: Long = System.currentTimeMillis()): String {
         val diffSeconds = (nowMs - timestampMs) / 1000
+        // One bucket per unit: never render a zero-valued unit ("0m ago").
         return when {
             diffSeconds < 0L -> "just now"
-            diffSeconds < 45L -> "${diffSeconds}s ago"
-            diffSeconds < 2_700L -> "${diffSeconds / 60}m ago"
-            diffSeconds < 64_800L -> "${diffSeconds / 3_600}h ago"
+            diffSeconds < 60L -> "${diffSeconds}s ago"
+            diffSeconds < 3_600L -> "${diffSeconds / 60}m ago"
+            diffSeconds < 86_400L -> "${diffSeconds / 3_600}h ago"
             else -> "${diffSeconds / 86_400}d ago"
         }
     }

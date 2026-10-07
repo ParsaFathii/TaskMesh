@@ -249,7 +249,7 @@ class SessionRepository(private val store: TokenStore) {
         return if (raw.endsWith("/")) raw else "$raw/"
     }
 
-    private fun response.toApiException(): ApiException {
+    private fun Response.toApiException(): ApiException {
         val bodyText = runCatching { body?.string() }.getOrNull()
         val envelope = bodyText?.let { text ->
             runCatching {

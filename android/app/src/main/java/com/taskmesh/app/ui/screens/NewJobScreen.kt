@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taskmesh.app.ServiceLocator
 import com.taskmesh.app.data.ApiErrors
@@ -225,7 +226,7 @@ fun NewJobScreen(onBack: () -> Unit, onCreated: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            ChipFlowRow(items = state.projects.map { it.id to it.name }, selectedKey = state.projectId) { key ->
+            ChipFlowRow(options = state.projects.map { it.id to it.name }, selectedKey = state.projectId) { key ->
                 screenViewModel.setProject(key)
             }
         }
@@ -238,7 +239,7 @@ fun NewJobScreen(onBack: () -> Unit, onCreated: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        ChipFlowRow(items = state.types.map { it to it }, selectedKey = state.type) { key ->
+        ChipFlowRow(options = state.types.map { it to it }, selectedKey = state.type) { key ->
             screenViewModel.setType(key)
         }
 

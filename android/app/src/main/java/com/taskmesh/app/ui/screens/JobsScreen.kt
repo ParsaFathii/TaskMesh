@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taskmesh.app.ServiceLocator
 import com.taskmesh.app.data.ApiErrors
@@ -183,7 +184,7 @@ fun JobsScreen(
     onJobClick: (String) -> Unit,
     onNewJob: () -> Unit,
 ) {
-    val screenViewModel: JobsViewModel = viewModel { JobsViewModel(initialProject) }
+    val screenViewModel: JobsViewModel = viewModel { JobsViewModel(initialProjectId = initialProject) }
     val state by screenViewModel.uiState.collectAsState()
     val projectNames = state.projects.associate { project -> project.id to project.name }
 
