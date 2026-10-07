@@ -2,7 +2,7 @@
 # Toolchain — verified against Google Maven / Maven Central / Gradle Plugin Portal:
 #   AGP 8.7.3 requires Gradle 8.9+ (we use 8.10.2) and JDK 17+, supports compileSdk 35.
 #   Kotlin 2.0.21 ships the Compose compiler Gradle plugin (org.jetbrains.kotlin.plugin.compose).
-agp = "8.7.3"
+agp = "9.4.1"
 kotlin = "2.0.21"
 composeBom = "2024.09.03"
 
