@@ -4,7 +4,7 @@
 #   Kotlin 2.0.21 ships the Compose compiler Gradle plugin (org.jetbrains.kotlin.plugin.compose).
 agp = "8.7.3"
 kotlin = "2.0.21"
-composeBom = "2024.09.03"
+composeBom = "2026.09.00"
 
 coreKtx = "1.13.1"
 lifecycle = "2.8.6"
