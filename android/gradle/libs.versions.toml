@@ -11,7 +11,7 @@ lifecycle = "2.8.6"
 activityCompose = "1.9.2"
 navigationCompose = "2.8.1"
 
-retrofit = "2.11.0"
+retrofit = "3.0.0"
 okhttp = "4.12.0"
 kotlinxSerialization = "1.7.3"
 kotlinxCoroutines = "1.8.1"
