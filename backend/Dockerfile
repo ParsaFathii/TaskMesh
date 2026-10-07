@@ -2,7 +2,7 @@
 # Build:  docker build -t taskmesh-backend:0.1.0 ./backend
 # Run:    docker run -p 8080:8080 -e TASKMESH_DB_URL=jdbc:postgresql://postgres:5432/taskmesh taskmesh-backend:0.1.0
 
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /src
 COPY pom.xml .
 RUN mvn -q -B dependency:go-offline
