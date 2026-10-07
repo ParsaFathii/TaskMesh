@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="830" viewBox="0 0 1060 830" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2ea043"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1060" height="830" fill="#ffffff"/>
+
+  <text x="530" y="34" text-anchor="middle" font-size="20" font-weight="bold" fill="#101418">TaskMesh — System Architecture</text>
+  <text x="530" y="54" text-anchor="middle" font-size="12" fill="#57606a">PostgreSQL 16 is the datastore and the job queue — no external broker (v0.1.0)</text>
+
+  <!-- Clients -->
+  <rect x="210" y="86" width="260" height="70" rx="8" fill="#fff7e8" stroke="#f5a623" stroke-width="1.5"/>
+  <text x="340" y="110" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">Web Console</text>
+  <text x="340" y="128" text-anchor="middle" font-size="11" fill="#57606a">React 18 + Vite + TypeScript (dev :5173)</text>
+  <text x="340" y="144" text-anchor="middle" font-size="11" fill="#57606a">REST + WebSocket</text>
+
+  <rect x="590" y="86" width="260" height="70" rx="8" fill="#fff7e8" stroke="#f5a623" stroke-width="1.5"/>
+  <text x="720" y="110" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">Android Client</text>
+  <text x="720" y="128" text-anchor="middle" font-size="11" fill="#57606a">Kotlin 2.0 + Jetpack Compose</text>
+  <text x="720" y="144" text-anchor="middle" font-size="11" fill="#57606a">REST via Retrofit (polling 30 s)</text>
+
+  <!-- Clients -> API -->
+  <path d="M 340 156 L 340 206" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="350" y="186" font-size="11" fill="#57606a">HTTPS REST /api/v1</text>
+  <path d="M 720 156 L 720 206" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="610" y="186" text-anchor="end" font-size="11" fill="#57606a">WS /ws/v1/events</text>
+
+  <!-- API -->
+  <rect x="310" y="210" width="440" height="98" rx="8" fill="#ffffff" stroke="#101418" stroke-width="1.5"/>
+  <text x="530" y="236" text-anchor="middle" font-size="15" font-weight="bold" fill="#101418">Spring Boot API — Java 21 (:8080)</text>
+  <text x="530" y="258" text-anchor="middle" font-size="11" fill="#57606a">JWT auth (HS256, 12 h) • roles ADMIN / OPERATOR / USER</text>
+  <text x="530" y="276" text-anchor="middle" font-size="11" fill="#57606a">Flyway migrations • result serving • audit log</text>
+  <text x="530" y="294" text-anchor="middle" font-size="11" fill="#57606a">maintenance sweeper every 5 s</text>
+
+  <!-- Sweeper note -->
+  <rect x="790" y="216" width="262" height="86" rx="8" fill="#ffffff" stroke="#8b949e" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="921" y="238" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">Sweeper (single instance)</text>
+  <text x="921" y="256" text-anchor="middle" font-size="10" fill="#57606a">RUNNING + lease expired → RETRYING</text>
+  <text x="921" y="271" text-anchor="middle" font-size="10" fill="#57606a">(or TIMED_OUT past timeout + 60 s)</text>
+  <text x="921" y="286" text-anchor="middle" font-size="10" fill="#57606a">stale workers → OFFLINE • cancel</text>
+  <text x="921" y="301" text-anchor="middle" font-size="10" fill="#57606a">grace: lease + 30 s → CANCELLED</text>
+  <path d="M 750 259 L 790 259" stroke="#8b949e" stroke-width="1.2" stroke-dasharray="4 3" fill="none"/>
+
+  <!-- API <-> PostgreSQL -->
+  <path d="M 390 308 L 390 338 L 240 338 L 240 378" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="250" y="330" font-size="11" fill="#57606a">JDBC / JPA / Flyway</text>
+  <path d="M 310 378 L 310 356 L 530 356 L 530 308" stroke="#2ea043" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="540" y="348" font-size="11" fill="#2ea043">LISTEN taskmesh_events → broadcast WS frames</text>
+
+  <!-- PostgreSQL -->
+  <rect x="70" y="380" width="380" height="192" rx="8" fill="#eef7ef" stroke="#2ea043" stroke-width="1.5"/>
+  <text x="260" y="406" text-anchor="middle" font-size="15" font-weight="bold" fill="#101418">PostgreSQL 16 (:5433 local / :5432 compose)</text>
+  <text x="260" y="430" text-anchor="middle" font-size="11" fill="#57606a">users • projects • jobs • job_attempts</text>
+  <text x="260" y="448" text-anchor="middle" font-size="11" fill="#57606a">job_logs • job_results • workers • audit_logs</text>
+  <line x1="100" y1="464" x2="420" y2="464" stroke="#2ea043" stroke-width="0.8"/>
+  <text x="260" y="484" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">Same database is also the queue:</text>
+  <text x="260" y="502" text-anchor="middle" font-size="11" fill="#57606a">claims: SELECT … FOR UPDATE SKIP LOCKED</text>
+  <text x="260" y="520" text-anchor="middle" font-size="11" fill="#57606a">wakeups: LISTEN/NOTIFY channel taskmesh_events</text>
+  <text x="260" y="538" text-anchor="middle" font-size="11" fill="#57606a">leases: lease_expires_at renewed by heartbeat</text>
+  <text x="260" y="556" text-anchor="middle" font-size="11" fill="#57606a">visibility: 5 s sweeper on the backend</text>
+
+  <!-- Workers -->
+  <rect x="600" y="384" width="380" height="188" rx="8" fill="#eef7ef" stroke="#2ea043" stroke-width="1.5"/>
+  <rect x="610" y="394" width="380" height="188" rx="8" fill="#eef7ef" stroke="#2ea043" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <text x="790" y="420" text-anchor="middle" font-size="15" font-weight="bold" fill="#101418">Python Workers × N (psycopg 3)</text>
+  <text x="790" y="444" text-anchor="middle" font-size="11" fill="#57606a">loop: claim → execute → report → finalize</text>
+  <text x="790" y="462" text-anchor="middle" font-size="11" fill="#57606a">heartbeat + lease renewal every 10 s</text>
+  <text x="790" y="480" text-anchor="middle" font-size="11" fill="#57606a">7 typed job handlers, strict validation</text>
+  <text x="790" y="498" text-anchor="middle" font-size="11" fill="#57606a">capabilities filter: type = ANY(…)</text>
+  <text x="790" y="516" text-anchor="middle" font-size="11" fill="#57606a">SIGTERM drains / SIGINT abandons</text>
+  <text x="790" y="534" text-anchor="middle" font-size="11" fill="#57606a">control API :9100+ per worker (/health, /status)</text>
+  <text x="790" y="556" text-anchor="middle" font-size="11" fill="#57606a">scale horizontally — each claims independently</text>
+
+  <!-- PG <-> Workers -->
+  <path d="M 450 416 L 596 416" stroke="#2ea043" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="523" y="408" text-anchor="middle" font-size="11" fill="#57606a">claims (SKIP LOCKED), heartbeats</text>
+  <path d="M 596 458 L 454 458" stroke="#2ea043" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="523" y="476" text-anchor="middle" font-size="11" fill="#57606a">progress, results, NOTIFY</text>
+
+  <!-- Storage -->
+  <rect x="330" y="628" width="400" height="96" rx="8" fill="#f6f8fa" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="530" y="652" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">Shared Storage — TASKMESH_STORAGE_DIR</text>
+  <text x="530" y="672" text-anchor="middle" font-size="11" fill="#57606a">file results &gt; 32 KiB: results/&lt;job_id&gt;[…], sha256 recorded</text>
+  <text x="530" y="690" text-anchor="middle" font-size="11" fill="#57606a">inline JSONB results ≤ 32 KiB stay in PostgreSQL</text>
+  <text x="530" y="708" text-anchor="middle" font-size="11" fill="#57606a">shared volume between backend and workers</text>
+
+  <!-- Workers -> Storage -->
+  <path d="M 690 582 L 690 624" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="700" y="602" font-size="11" fill="#57606a">writes file results</text>
+
+  <!-- Storage -> API (serves results) -->
+  <path d="M 330 676 L 30 676 L 30 258 L 306 258" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="160" y="668" text-anchor="middle" font-size="11" fill="#57606a">API serves file results</text>
+  <text x="180" y="712" font-size="10" fill="#8b949e">(path-traversal protected; X-Job-Result-SHA256 header)</text>
+
+  <!-- Legend -->
+  <rect x="70" y="760" width="920" height="46" rx="8" fill="#ffffff" stroke="#8b949e" stroke-width="1"/>
+  <rect x="88" y="772" width="14" height="14" rx="3" fill="#fff7e8" stroke="#f5a623" stroke-width="1.5"/>
+  <text x="108" y="784" font-size="11" fill="#101418">clients</text>
+  <rect x="170" y="772" width="14" height="14" rx="3" fill="#eef7ef" stroke="#2ea043" stroke-width="1.5"/>
+  <text x="190" y="784" font-size="11" fill="#101418">data + workers</text>
+  <rect x="290" y="772" width="14" height="14" rx="3" fill="#ffffff" stroke="#101418" stroke-width="1.5"/>
+  <text x="310" y="784" font-size="11" fill="#101418">services</text>
+  <text x="400" y="784" font-size="11" fill="#57606a">workers claim every 1 s (SKIP LOCKED, no duplicate claims); LISTEN/NOTIFY feeds the live event stream</text>
+</svg>

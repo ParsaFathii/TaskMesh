@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="710" viewBox="0 0 1040 710" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1040" height="710" fill="#ffffff"/>
+
+  <text x="520" y="32" text-anchor="middle" font-size="20" font-weight="bold" fill="#101418">Release Pipeline — tag-triggered (.github/workflows/release.yml)</text>
+
+  <!-- S1: tag -->
+  <rect x="390" y="60" width="260" height="48" rx="8" fill="#f6f8fa" stroke="#101418" stroke-width="1.5"/>
+  <text x="520" y="80" text-anchor="middle" font-size="13" font-weight="bold" fill="#101418">git push tag v*.*.*</text>
+  <text x="520" y="97" text-anchor="middle" font-size="10" fill="#57606a">e.g. v0.1.0</text>
+
+  <!-- S2: validate -->
+  <rect x="190" y="140" width="660" height="170" rx="8" fill="#eef7ef" stroke="#2ea043" stroke-width="1.5"/>
+  <text x="520" y="166" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">validate job — clean builds + full test suites</text>
+  <text x="520" y="183" text-anchor="middle" font-size="10" fill="#57606a">ubuntu-latest + PostgreSQL 16 service · tag ↔ pom.xml ↔ pyproject.toml ↔ package.json version check</text>
+  <rect x="215" y="196" width="300" height="46" rx="6" fill="#ffffff" stroke="#2ea043" stroke-width="1"/>
+  <text x="365" y="214" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">backend — mvn clean verify</text>
+  <text x="365" y="231" text-anchor="middle" font-size="10" fill="#57606a">99 tests (unit + integration vs PostgreSQL)</text>
+  <rect x="530" y="196" width="300" height="46" rx="6" fill="#ffffff" stroke="#2ea043" stroke-width="1"/>
+  <text x="680" y="214" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">worker — ruff + pytest + build</text>
+  <text x="680" y="231" text-anchor="middle" font-size="10" fill="#57606a">146 tests · wheel + sdist built</text>
+  <rect x="215" y="254" width="300" height="46" rx="6" fill="#ffffff" stroke="#2ea043" stroke-width="1"/>
+  <text x="365" y="272" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">web — eslint + tsc + vitest + build</text>
+  <text x="365" y="289" text-anchor="middle" font-size="10" fill="#57606a">62 tests · strict TypeScript · vite build</text>
+  <rect x="530" y="254" width="300" height="46" rx="6" fill="#ffffff" stroke="#2ea043" stroke-width="1"/>
+  <text x="680" y="272" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">android — testDebugUnitTest</text>
+  <text x="680" y="289" text-anchor="middle" font-size="10" fill="#57606a">75 tests · unsigned release APK</text>
+
+  <!-- S3: artifacts -->
+  <rect x="190" y="340" width="660" height="140" rx="8" fill="#fff7e8" stroke="#f5a623" stroke-width="1.5"/>
+  <text x="520" y="364" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">release artifacts</text>
+  <rect x="215" y="378" width="300" height="42" rx="6" fill="#ffffff" stroke="#f5a623" stroke-width="1"/>
+  <text x="365" y="395" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">taskmesh-backend-&lt;v&gt;.jar</text>
+  <text x="365" y="411" text-anchor="middle" font-size="10" fill="#57606a">Spring Boot fat JAR (Java 21)</text>
+  <rect x="530" y="378" width="300" height="42" rx="6" fill="#ffffff" stroke="#f5a623" stroke-width="1"/>
+  <text x="680" y="395" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">taskmesh_worker-&lt;v&gt;.whl + .tar.gz</text>
+  <text x="680" y="411" text-anchor="middle" font-size="10" fill="#57606a">Python worker package</text>
+  <rect x="215" y="428" width="300" height="42" rx="6" fill="#ffffff" stroke="#f5a623" stroke-width="1"/>
+  <text x="365" y="445" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">taskmesh-web-&lt;v&gt;.zip</text>
+  <text x="365" y="461" text-anchor="middle" font-size="10" fill="#57606a">static production bundle</text>
+  <rect x="530" y="428" width="300" height="42" rx="6" fill="#ffffff" stroke="#f5a623" stroke-width="1"/>
+  <text x="680" y="445" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">taskmesh-android-&lt;v&gt;-unsigned.apk</text>
+  <text x="680" y="461" text-anchor="middle" font-size="10" fill="#57606a">unsigned release build — sign before install</text>
+
+  <!-- S4: SBOM -->
+  <rect x="190" y="510" width="330" height="68" rx="8" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
+  <text x="355" y="534" text-anchor="middle" font-size="13" font-weight="bold" fill="#101418">CycloneDX SBOMs</text>
+  <text x="355" y="552" text-anchor="middle" font-size="10" fill="#57606a">sbom-backend.json · sbom-worker.json</text>
+  <text x="355" y="566" text-anchor="middle" font-size="10" fill="#57606a">sbom-web.json</text>
+
+  <!-- S5: checksums -->
+  <rect x="560" y="510" width="290" height="68" rx="8" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
+  <text x="705" y="534" text-anchor="middle" font-size="13" font-weight="bold" fill="#101418">SHA256SUMS</text>
+  <text x="705" y="552" text-anchor="middle" font-size="10" fill="#57606a">checksums for all artifacts + SBOMs</text>
+  <text x="705" y="566" text-anchor="middle" font-size="10" fill="#57606a">verified with sha256sum -c</text>
+
+  <!-- S6: release -->
+  <rect x="190" y="606" width="660" height="70" rx="8" fill="#eef7ef" stroke="#2ea043" stroke-width="1.5"/>
+  <text x="520" y="630" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">GitHub Release — gh release create</text>
+  <text x="520" y="648" text-anchor="middle" font-size="11" fill="#57606a">jar · wheel · sdist · zip · APK · SBOMs · SHA256SUMS</text>
+  <text x="520" y="664" text-anchor="middle" font-size="11" fill="#57606a">docker.yml publishes ghcr.io/parsafathii/taskmesh-{backend,worker,web} on the same tag</text>
+
+  <!-- arrows -->
+  <path d="M 520 108 L 520 136" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 520 310 L 520 336" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 355 480 L 355 506" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 690 480 L 690 506" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 355 578 L 355 602" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 690 578 L 690 602" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+  <text x="520" y="698" text-anchor="middle" font-size="11" fill="#57606a">failure at any stage aborts the release (nothing is published); after publishing, assets are listed and counted via gh release view</text>
+</svg>

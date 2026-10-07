@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#f85149"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="620" fill="#ffffff"/>
+
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#101418">Worker Lifecycle — states and failure handling</text>
+
+  <!-- STARTING -->
+  <rect x="70" y="90" width="170" height="54" rx="8" fill="#f6f8fa" stroke="#101418" stroke-width="1.5"/>
+  <text x="155" y="113" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">STARTING</text>
+  <text x="155" y="131" text-anchor="middle" font-size="10" fill="#57606a">register row in workers</text>
+
+  <!-- IDLE -->
+  <rect x="350" y="90" width="170" height="54" rx="8" fill="#f6f8fa" stroke="#101418" stroke-width="1.5"/>
+  <text x="435" y="113" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">IDLE</text>
+  <text x="435" y="131" text-anchor="middle" font-size="10" fill="#57606a">no current job, claiming</text>
+
+  <!-- BUSY -->
+  <rect x="630" y="90" width="200" height="54" rx="8" fill="#fff7e8" stroke="#f5a623" stroke-width="1.5"/>
+  <text x="730" y="113" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">BUSY</text>
+  <text x="730" y="131" text-anchor="middle" font-size="10" fill="#57606a">executing one job</text>
+
+  <!-- DRAINING -->
+  <rect x="350" y="250" width="170" height="54" rx="8" fill="#ffffff" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="435" y="273" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">DRAINING</text>
+  <text x="435" y="291" text-anchor="middle" font-size="10" fill="#57606a">no new claims</text>
+
+  <!-- ERROR -->
+  <rect x="630" y="350" width="200" height="54" rx="8" fill="#fdecee" stroke="#f85149" stroke-width="1.5"/>
+  <text x="730" y="373" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">ERROR</text>
+  <text x="730" y="391" text-anchor="middle" font-size="10" fill="#57606a">unrecoverable error</text>
+
+  <!-- OFFLINE -->
+  <rect x="60" y="420" width="180" height="54" rx="8" fill="#f6f8fa" stroke="#101418" stroke-width="1.5"/>
+  <text x="150" y="443" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">OFFLINE</text>
+  <text x="150" y="461" text-anchor="middle" font-size="10" fill="#57606a">sweeper or clean drain</text>
+
+  <!-- STARTING -> IDLE -->
+  <path d="M 240 117 L 346 117" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="293" y="109" text-anchor="middle" font-size="11" fill="#57606a">registered</text>
+
+  <!-- IDLE <-> BUSY -->
+  <path d="M 520 104 L 626 104" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="573" y="96" text-anchor="middle" font-size="11" fill="#57606a">claim</text>
+  <path d="M 630 130 L 526 130" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="578" y="144" text-anchor="middle" font-size="11" fill="#57606a">done</text>
+
+  <!-- IDLE -> DRAINING -->
+  <path d="M 435 144 L 435 246" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="443" y="200" font-size="11" fill="#57606a">SIGTERM</text>
+
+  <!-- BUSY -> DRAINING -->
+  <path d="M 790 144 L 790 277 L 526 277" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="690" y="262" font-size="11" fill="#57606a">finish current job</text>
+
+  <!-- DRAINING -> OFFLINE -->
+  <path d="M 350 277 L 150 277 L 150 416" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="250" y="269" text-anchor="middle" font-size="11" fill="#57606a">exit 0</text>
+
+  <!-- BUSY -> ERROR -->
+  <path d="M 680 144 L 680 346" stroke="#f85149" stroke-width="1.5" fill="none" marker-end="url(#arrow-rose)"/>
+  <text x="688" y="240" font-size="11" fill="#57606a">fatal</text>
+
+  <!-- ERROR -> OFFLINE -->
+  <path d="M 730 404 L 730 447 L 246 447" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="488" y="439" text-anchor="middle" font-size="11" fill="#57606a">process exits</text>
+
+  <!-- crash (dashed) -->
+  <path d="M 830 131 L 878 131 L 878 510 L 150 510 L 150 478" stroke="#f85149" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow-rose)"/>
+  <text x="514" y="502" text-anchor="middle" font-size="11" fill="#f85149">process killed (SIGKILL) — heartbeats stop; sweeper marks OFFLINE after 3 × heartbeat interval</text>
+
+  <!-- Footnotes -->
+  <text x="60" y="556" font-size="11" fill="#57606a">heartbeat every 10 s (TASKMESH_HEARTBEAT_INTERVAL_S): last_heartbeat + status + current_job_id; renews lease while BUSY</text>
+  <text x="60" y="574" font-size="11" fill="#57606a">SIGTERM → DRAINING: finish current job, mark OFFLINE, exit 0 · SIGINT → abandon to RETRYING (attempt ABANDONED), exit 130</text>
+  <text x="60" y="592" font-size="11" fill="#57606a">the worker never fakes liveness: if the process dies, heartbeats stop and the backend sweeper assigns OFFLINE</text>
+</svg>

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="580" viewBox="0 0 920 580" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#f85149"/>
+    </marker>
+    <marker id="arrow-graphite" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#101418"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="920" height="580" fill="#ffffff"/>
+
+  <text x="460" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#101418">Retry &amp; Backoff Flow</text>
+
+  <!-- A: attempt -->
+  <rect x="300" y="70" width="300" height="54" rx="8" fill="#f6f8fa" stroke="#101418" stroke-width="1.5"/>
+  <text x="450" y="93" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">ATTEMPT</text>
+  <text x="450" y="111" text-anchor="middle" font-size="10" fill="#57606a">job runs on a worker (handler thread + timeout)</text>
+
+  <!-- D1: retryable? -->
+  <polygon points="450,160 535,203 450,246 365,203" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
+  <text x="450" y="199" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">retryable</text>
+  <text x="450" y="214" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">error?</text>
+
+  <!-- FAILED (non-retryable) -->
+  <rect x="690" y="178" width="180" height="54" rx="8" fill="#fdecee" stroke="#f85149" stroke-width="1.5"/>
+  <text x="780" y="201" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">FAILED</text>
+  <text x="780" y="219" text-anchor="middle" font-size="10" fill="#57606a">terminal — no retry</text>
+
+  <!-- D2: retries left? -->
+  <polygon points="450,300 535,343 450,386 365,343" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
+  <text x="450" y="339" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">retries</text>
+  <text x="450" y="354" text-anchor="middle" font-size="11" font-weight="bold" fill="#101418">left?</text>
+
+  <!-- terminal (exhausted) -->
+  <rect x="640" y="316" width="240" height="54" rx="8" fill="#fdecee" stroke="#f85149" stroke-width="1.5"/>
+  <text x="760" y="339" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">FAILED / TIMED_OUT</text>
+  <text x="760" y="357" text-anchor="middle" font-size="10" fill="#57606a">terminal (error → FAILED · timeout → TIMED_OUT)</text>
+
+  <!-- B: RETRYING -->
+  <rect x="290" y="440" width="320" height="54" rx="8" fill="#fff7e8" stroke="#f5a623" stroke-width="1.5"/>
+  <text x="450" y="462" text-anchor="middle" font-size="14" font-weight="bold" fill="#101418">RETRYING</text>
+  <text x="450" y="481" text-anchor="middle" font-size="10" fill="#57606a">available_at = now() + min(300, 2^retry_count · 5) s</text>
+
+  <!-- edges -->
+  <path d="M 450 124 L 450 156" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 535 203 L 686 203" stroke="#f85149" stroke-width="1.5" fill="none" marker-end="url(#arrow-rose)"/>
+  <text x="560" y="195" font-size="11" fill="#57606a">no</text>
+  <path d="M 450 246 L 450 296" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="460" y="278" font-size="11" fill="#57606a">yes</text>
+  <path d="M 535 343 L 636 343" stroke="#f85149" stroke-width="1.5" fill="none" marker-end="url(#arrow-rose)"/>
+  <text x="556" y="332" font-size="11" fill="#57606a">no (exhausted)</text>
+  <path d="M 450 386 L 450 436" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="460" y="418" font-size="11" fill="#57606a">yes</text>
+
+  <!-- loop back to next attempt -->
+  <path d="M 290 467 L 150 467 L 150 97 L 296 97" stroke="#57606a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="152" y="280" font-size="11" fill="#57606a">next attempt: re-claim when available_at ≤ now()</text>
+
+  <!-- manual retry (dashed) -->
+  <path d="M 880 343 L 905 343 L 905 97 L 604 97" stroke="#101418" stroke-width="1.2" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow-graphite)"/>
+  <text x="755" y="140" text-anchor="middle" font-size="11" fill="#101418">manual retry — resets retry_count</text>
+
+  <!-- Footnotes -->
+  <text x="60" y="525" font-size="11" fill="#57606a">retry_count increments when entering RETRYING; default max_retries = 3 (constraint 0..10); invalid payloads are non-retryable</text>
+  <text x="60" y="543" font-size="11" fill="#57606a">worker-side timeout: handler thread hits timeout_seconds → job finalized TIMED_OUT/RETRYING (CPython threads cannot be killed)</text>
+  <text x="60" y="561" font-size="11" fill="#57606a">manual retry (owner or OPERATOR+): FAILED / TIMED_OUT / CANCELLED → QUEUED, retry_count reset to 0, last_error kept</text>
+</svg>
