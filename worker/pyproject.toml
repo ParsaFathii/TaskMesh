@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "taskmesh-worker"
+version = "0.1.0"
+description = "TaskMesh Python worker runtime: claims jobs from PostgreSQL, executes typed handlers, stores results."
+readme = "README.md"
+authors = [{ name = "Parsa Fathi" }]
+license = { text = "Apache-2.0" }
+requires-python = ">=3.12"
+keywords = ["taskmesh", "job-queue", "worker", "postgresql"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Distributed Computing",
+]
+dependencies = [
+    "psycopg[binary]>=3.1",
+    "pillow>=10",
+    "fastapi>=0.111",
+    "uvicorn>=0.30",
+    "pydantic>=2.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-timeout",
+    "ruff",
+    "httpx",
+    "build",
+]
+
+[project.urls]
+Homepage = "https://github.com/ParsaFathii/TaskMesh"
+Repository = "https://github.com/ParsaFathii/TaskMesh"
+Issues = "https://github.com/ParsaFathii/TaskMesh/issues"
+
+[project.scripts]
+taskmesh-worker = "taskmesh_worker.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/taskmesh_worker"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "scripts", "README.md", "pyproject.toml"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+timeout = 60
+timeout_method = "thread"
