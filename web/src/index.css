@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+ * TaskMesh design tokens
+ * An operations console with queue lanes: graphite background, hairline
+ * borders, amber accent, monospace data. Single dark theme by design.
+ * ------------------------------------------------------------------------- */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --color-bg: #101418;
+  --color-bg-deep: #0b0e12;
+  --color-panel: #151a21;
+  --color-panel-2: #1b212b;
+  --color-line: #262d37;
+  --color-line-bright: #3e4753;
+  --color-ink: #e6e8ea;
+  --color-mute: #8b949e;
+  --color-dim: #626b76;
+
+  --color-amber: #f5a623;
+  --color-amber-deep: #e39a1b;
+  --color-amber-dim: #b07a24;
+  --color-emerald: #2ea043;
+  --color-rose: #f85149;
+  --color-yellow: #d29922;
+  --color-orange: #e5683c;
+  --color-teal: #39c5cf;
+
+  --animate-pulse-status: pulse-status 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-row-flash: row-flash 1.8s ease-out 1 both;
+  --animate-ticker-in: ticker-in 0.22s ease-out 1 both;
+  --animate-banner-in: banner-in 0.25s ease-out 1 both;
+
+  @keyframes pulse-status {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes row-flash {
+    0% { background-color: color-mix(in srgb, #f5a623 16%, transparent); }
+    100% { background-color: transparent; }
+  }
+  @keyframes ticker-in {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes banner-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scrollbar-color: var(--color-line-bright) var(--color-bg);
+  }
+
+  body {
+    @apply bg-bg font-sans text-sm text-ink antialiased;
+    background-image: radial-gradient(color-mix(in srgb, var(--color-line) 38%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-amber) 32%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 2px;
+  }
+}
+
+/* Uppercase micro label — the console's typographic signature */
+@utility micro {
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Thin dark scrollbars for lanes / tickers / consoles */
+@utility scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-bright) transparent;
+  &::-webkit-scrollbar {
+    height: 7px;
+    width: 7px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-line-bright);
+    border-radius: 2px;
+  }
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
