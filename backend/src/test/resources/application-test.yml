@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${TASKMESH_TEST_DB_URL:jdbc:postgresql://localhost:5433/taskmesh_test}
+    username: ${TASKMESH_TEST_DB_USER:taskmesh}
+    password: ${TASKMESH_TEST_DB_PASSWORD:}
+  flyway:
+    clean-disabled: false
+
+taskmesh:
+  storage-dir: ./target/test-data
+  scheduling-enabled: false
+  login-rate-limit-per-minute: 10

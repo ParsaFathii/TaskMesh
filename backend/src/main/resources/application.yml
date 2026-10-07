@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: taskmesh-backend
+  datasource:
+    url: ${TASKMESH_DB_URL:jdbc:postgresql://localhost:5433/taskmesh}
+    username: ${TASKMESH_DB_USER:taskmesh}
+    password: ${TASKMESH_DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 8
+      minimum-idle: 2
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: non_null
+  main:
+    banner-mode: off
+
+server:
+  port: ${TASKMESH_SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+  shutdown: graceful
+
+taskmesh:
+  jwt-secret: ${TASKMESH_JWT_SECRET:taskmesh-dev-secret-change-me}
+  storage-dir: ${TASKMESH_STORAGE_DIR:./data}
+  cors-origins: ${TASKMESH_CORS_ORIGINS:http://localhost:5173}
+  login-rate-limit-per-minute: 10
+  scheduling-enabled: true
+  listener-enabled: true
+  event-channel: taskmesh_events
