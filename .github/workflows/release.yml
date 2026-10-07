@@ -196,7 +196,7 @@ jobs:
             echo "- Android APK is unsigned; release signing requires your own keystore"
             echo "- Queue uses PostgreSQL SKIP LOCKED (no external broker required); RabbitMQ integration is a documented future path"
             echo "- Web console is dark-theme only by design"
-          } > release-notes.md
+          } > release/release-notes.md
           cat release-notes.md
       - name: Create GitHub Release
         env:
