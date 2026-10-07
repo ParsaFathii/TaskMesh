@@ -1,5 +1,5 @@
-# Root build file for the TaskMesh Android client.
-# Versions are managed centrally in gradle/libs.versions.toml.
+// Root build file for the TaskMesh Android client.
+// Versions are managed centrally in gradle/libs.versions.toml.
 
 plugins {
     alias(libs.plugins.android.application) apply false

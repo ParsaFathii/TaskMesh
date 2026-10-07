@@ -100,7 +100,8 @@ jobs:
         run: |
           python -m venv /tmp/wheelcheck
           /tmp/wheelcheck/bin/pip install dist/*.whl
-          /tmp/wheelcheck/bin/python -c "import taskmesh_worker; from taskmesh_worker.registry import HANDLERS; assert len(HANDLERS) >= 7"
+          test -x /tmp/wheelcheck/bin/taskmesh-worker
+          /tmp/wheelcheck/bin/python -c "from taskmesh_worker.registry import ALL_JOB_TYPES, BUILTIN_HANDLERS; assert len(BUILTIN_HANDLERS) == 7 and len(ALL_JOB_TYPES) == 7, ALL_JOB_TYPES"
 
   web:
     name: Web (React + Vite, node ${{ matrix.node }})
