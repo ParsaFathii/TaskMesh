@@ -1,0 +1,36 @@
+# Build outputs
+backend/target/
+web/dist/
+web/node_modules/
+web/.vite/
+android/.gradle/
+android/build/
+android/app/build/
+android/app/release/
+android/local.properties
+worker/.venv/
+worker/dist/
+worker/build/
+*.egg-info/
+__pycache__/
+*.py[cod]
+
+# Local runtime state
+/data/
+/worker/data/
+*.log
+*.pid
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+*.keystore
+*.jks
+secrets/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
